@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CareFirst General Hospital – Management & Patient Portal
 React (Vite) + Tailwind · Node/Express · MongoDB (Mongoose) · JWT auth.
 
@@ -22,3 +23,6 @@ npm install && npm run dev                   # http://localhost:5173
 
 ## Not yet built
 Admin screens for adding/editing doctors and departments (the API endpoints exist: `POST/PUT/DELETE /api/doctors` and `/api/departments`, admin token required).
+=======
+# care-website
+>>>>>>> 37ba225301a753b7449f9da5e0aae84e725c00b6
