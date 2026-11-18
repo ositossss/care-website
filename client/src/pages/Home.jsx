@@ -1,0 +1,17 @@
+import { useEffect, useState } from 'react'; import { Link } from 'react-router-dom'; import { Clock, Siren, CalendarCheck } from 'lucide-react'; import api from '../api'; import { Spinner } from '../ui';
+const stats = [['120+', 'Doctors'], ['450', 'Beds'], ['35', 'Years of service'], ['24/7', 'Emergency care']];
+const quotes = [['The cardiology team caught my problem early and explained every step.', 'Amina R.'], ['Booking online took two minutes, and my daughter loved her pediatrician.', 'David K.'], ['Knee replacement recovery was faster than I expected.', 'Maria S.']];
+export default function Home() {
+  const [d, setD] = useState(null); const [docs, setDocs] = useState(null);
+  useEffect(() => { api.get('/departments').then((r) => setD(r.data)); api.get('/doctors').then((r) => setDocs(r.data.slice(0, 3))); }, []);
+  return (<>
+    <section className="bg-teal-800 px-4 py-20 text-white"><div className="mx-auto max-w-6xl"><h1 className="max-w-2xl font-display text-4xl font-bold md:text-6xl">Compassionate Care, Advanced Medicine</h1>
+      <p className="mt-4 max-w-xl text-lg text-teal-50">CareFirst General Hospital brings specialist doctors, modern diagnostics and round-the-clock emergency care together under one roof.</p>
+      <div className="mt-8 flex flex-wrap gap-3"><Link to="/book" className="rounded-lg bg-white px-6 py-3 font-semibold text-teal-900 hover:bg-teal-50">Book an Appointment</Link><Link to="/doctors" className="rounded-lg border border-white px-6 py-3 font-semibold hover:bg-teal-700">Find a Doctor</Link></div></div></section>
+    <section className="mx-auto grid max-w-6xl gap-4 px-4 py-8 md:grid-cols-3">{[[Clock, 'Opening Hours', 'Clinics Mon–Sat, 8 AM – 8 PM'], [Siren, 'Emergency Care', 'Open 24 hours, every day'], [CalendarCheck, 'Online Booking', 'Pick a doctor and a time in minutes']].map(([I, t, s]) =>
+      <div key={t} className="card flex gap-3"><I className="h-6 w-6 text-teal-700" /><div><p className="font-semibold">{t}</p><p className="text-slate-600">{s}</p></div></div>)}</section>
+    <section className="mx-auto max-w-6xl px-4 py-8"><h2 className="mb-4 font-display text-2xl font-bold">Medical departments</h2>{!d ? <Spinner /> : <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{d.map((x) => <Link key={x._id} to="/departments" className="card hover:border-teal-600"><h3 className="font-semibold">{x.name}</h3><p className="text-slate-600">{x.description}</p></Link>)}</div>}</section>
+    <section className="mx-auto max-w-6xl px-4 py-8"><h2 className="mb-4 font-display text-2xl font-bold">Featured doctors</h2>{!docs ? <Spinner /> : <div className="grid gap-4 md:grid-cols-3">{docs.map((x) => <div key={x._id} className="card"><p className="font-semibold">{x.name}</p><p className="text-teal-800">{x.specialty}</p><p className="text-slate-600">{x.experienceYears} years of experience</p><Link to={`/book?doctor=${x._id}`} className="btn mt-3">Book with doctor</Link></div>)}</div>}</section>
+    <section className="bg-white px-4 py-12"><div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-4">{stats.map(([n, l]) => <div key={l} className="text-center"><p className="font-display text-4xl font-bold text-teal-800">{n}</p><p className="text-slate-600">{l}</p></div>)}</div>
+      <div className="mx-auto mt-10 grid max-w-6xl gap-4 md:grid-cols-3">{quotes.map(([q, n]) => <blockquote key={n} className="card"><p>“{q}”</p><footer className="mt-2 text-sm font-medium text-slate-600">{n}</footer></blockquote>)}</div></section></>);
+}

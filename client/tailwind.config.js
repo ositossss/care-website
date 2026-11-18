@@ -1,0 +1,1 @@
+export default { content: ['./index.html', './src/**/*.{js,jsx}'], theme: { extend: { fontFamily: { sans: ['"Public Sans"', 'system-ui', 'sans-serif'], display: ['Fraunces', 'Georgia', 'serif'] } } }, plugins: [] };

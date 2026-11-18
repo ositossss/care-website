@@ -1,0 +1,18 @@
+import { useEffect, useState } from 'react'; import toast from 'react-hot-toast'; import api, { errMsg } from '../api'; import { Spinner, Badge } from '../ui';
+export default function Admin() {
+  const [stats, setStats] = useState(null); const [appts, setAppts] = useState(null); const [msgs, setMsgs] = useState([]); const [status, setStatus] = useState(''); const [date, setDate] = useState('');
+  const loadStats = () => api.get('/admin/stats').then((r) => setStats(r.data));
+  const loadAppts = () => api.get('/appointments', { params: { status, date } }).then((r) => setAppts(r.data));
+  useEffect(() => { loadStats(); api.get('/contact').then((r) => setMsgs(r.data)); }, []); useEffect(() => { loadAppts(); }, [status, date]);
+  const set = async (id, s) => { try { await api.patch(`/appointments/${id}/status`, { status: s }); toast.success('Marked ' + s); loadAppts(); loadStats(); } catch (e) { toast.error(errMsg(e)); } };
+  const read = async (id) => { await api.patch(`/contact/${id}/read`); setMsgs(msgs.map((m) => m._id === id ? { ...m, isRead: true } : m)); loadStats(); };
+  return (<div className="mx-auto max-w-6xl space-y-10 px-4 py-10"><h1 className="font-display text-3xl font-bold">Admin dashboard</h1>
+    {!stats ? <Spinner /> : <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{[['Doctors', stats.doctors], ['Appointments', stats.appointments], ['Pending', stats.pending], ['Unread messages', stats.unread]].map(([l, n]) => <div key={l} className="card"><p className="font-display text-3xl font-bold text-teal-800">{n}</p><p className="text-slate-600">{l}</p></div>)}</div>}
+    <section><h2 className="mb-3 text-xl font-semibold">Appointments</h2><div className="mb-3 flex flex-wrap gap-3"><select className="input w-48" aria-label="Status" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">All statuses</option>{['pending', 'confirmed', 'completed', 'cancelled'].map((s) => <option key={s}>{s}</option>)}</select>
+      <input type="date" className="input w-48" aria-label="Date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+      {!appts ? <Spinner /> : <div className="overflow-x-auto"><table className="w-full bg-white text-left text-sm"><thead className="bg-slate-100"><tr>{['Ref', 'Patient', 'Doctor', 'When', 'Status', 'Actions'].map((h) => <th key={h} className="p-2">{h}</th>)}</tr></thead><tbody>
+        {appts.map((a) => <tr key={a._id} className="border-t"><td className="p-2 font-mono">{a.referenceId}</td><td className="p-2">{a.patientName}<br /><span className="text-slate-500">{a.patientPhone}</span></td><td className="p-2">{a.doctor?.name}</td><td className="p-2">{a.date}<br />{a.timeSlot}</td><td className="p-2"><Badge s={a.status} /></td>
+          <td className="space-x-1 p-2">{[['confirmed', 'Confirm'], ['completed', 'Complete'], ['cancelled', 'Cancel']].map(([s, l]) => <button key={s} disabled={a.status === s} className="btn-ghost !px-2 !py-1" onClick={() => set(a._id, s)}>{l}</button>)}</td></tr>)}</tbody></table>{!appts.length && <p className="p-4">No appointments match these filters.</p>}</div>}</section>
+    <section><h2 className="mb-3 text-xl font-semibold">Inquiries</h2><ul className="space-y-3">{msgs.map((m) => <li key={m._id} className={`card ${m.isRead ? 'opacity-70' : 'border-teal-600'}`}><p className="font-semibold">{m.subject || 'No subject'} <span className="font-normal text-slate-600">· {m.name} ({m.email})</span></p><p>{m.message}</p>
+      {!m.isRead && <button className="btn-ghost mt-2" onClick={() => read(m._id)}>Mark as read</button>}</li>)}{!msgs.length && <p>No inquiries yet.</p>}</ul></section></div>);
+}
