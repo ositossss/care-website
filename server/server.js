@@ -10,7 +10,11 @@ const { protect, admin, notFound, errorHandler } = require('./middleware/auth');
 const app = express();
 
 app.use(cors({
-    origin: process.env.CLIENT_URL
+    origin: [
+        'https://care-website-tau.vercel.app',
+        'https://care-website-x9te.vercel.app'
+    ],
+    credentials: true
 }));
 
 app.use(express.json());
